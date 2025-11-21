@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sakshi Gupta</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #1c2128;
+            --terminal-green: #00ff41;
+            --terminal-cyan: #00ffff;
+            --terminal-yellow: #ffff00;
+            --terminal-red: #ff4444;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --border-color: #30363d;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        code, .mono {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+        }
+
+        .terminal-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            pointer-events: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: var(--terminal-green);
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--terminal-green);
+            padding: 0;
+            z-index: 1000;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .nav-header {
+            background: var(--bg-tertiary);
+            padding: 0.5rem 5%;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+
+        .nav-title {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-left: 1rem;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: flex-start;
+            gap: 0;
+            flex-wrap: wrap;
+            padding: 0 5%;
+        }
+
+        nav li {
+            border-right: 1px solid var(--border-color);
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            position: relative;
+            padding: 0.8rem 1.5rem;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover {
+            background: var(--bg-tertiary);
+            color: var(--terminal-green);
+        }
+
+        nav a.active {
+            background: var(--bg-primary);
+            color: var(--terminal-green);
+        }
+
+        section {
+            min-height: 100vh;
+            padding: 6rem 5% 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .terminal-window {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .terminal-header {
+            background: var(--bg-tertiary);
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .terminal-title {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+
+        .terminal-content {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            max-width: 900px;
+        }
+
+        .prompt {
+            color: var(--terminal-green);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .hero h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.5rem;
+            margin: 1rem 0;
+            color: var(--terminal-green);
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+            animation: fadeInUp 1s;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 12px;
+            height: 1.2em;
+            background: var(--terminal-green);
+            margin-left: 5px;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .hero .tagline {
+            font-size: 1.3rem;
+            color: var(--terminal-cyan);
+            margin-bottom: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            animation: fadeInUp 1s 0.2s backwards;
+        }
+
+        .command-line {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+            margin: 0.5rem 0;
+            animation: fadeInUp 1s 0.4s backwards;
+        }
+
+        .command-line .prompt {
+            color: var(--terminal-cyan);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            animation: fadeInUp 1s 0.6s backwards;
+        }
+
+        .social-links a {
+            padding: 0.7rem 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--terminal-green);
+            color: var(--terminal-green);
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .social-links a:hover {
+            background: var(--terminal-green);
+            color: var(--bg-primary);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: var(--terminal-green);
+            font-weight: 700;
+        }
+
+        h2::before {
+            content: '$ ';
+            color: var(--terminal-cyan);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--terminal-green);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: var(--bg-tertiary);
+            padding: 0.8rem 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card h3 {
+            color: var(--terminal-cyan);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .card .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .card .tech-stack {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tech-tag {
+            background: var(--bg-tertiary);
+            color: var(--terminal-green);
+            padding: 0.3rem 0.8rem;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+
+        .tech-tag:hover {
+            border-color: var(--terminal-green);
+            background: rgba(0, 255, 65, 0.1);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--terminal-green);
+        }
+
+        .timeline-item {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '>';
+            position: absolute;
+            left: -2.35rem;
+            top: 0.2rem;
+            color: var(--terminal-green);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .skill-category h4 {
+            color: var(--terminal-cyan);
+            margin-bottom: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
+
+        .skill-category h4::before {
+            content: '# ';
+            color: var(--terminal-green);
+        }
+
+        .skill-category ul {
+            list-style: none;
+        }
+
+        .skill-category li {
+            padding: 0.5rem 0;
+            color: var(--text-primary);
+            position: relative;
+            padding-left: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .skill-category li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--terminal-green);
+        }
+
+        .achievements-list {
+            list-style: none;
+            margin-top: 2rem;
+        }
+
+        .achievements-list li {
+            background: var(--bg-secondary);
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--terminal-green);
+            transition: all 0.3s;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+        }
+
+        .achievements-list li:hover {
+            border-color: var(--terminal-green);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.15);
+        }
+
+        .contact-content {
+            max-width: 700px;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .contact-item {
+            background: var(--bg-secondary);
+            padding: 1.2rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .contact-item:hover {
+            border-color: var(--terminal-green);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.15);
+        }
+
+        .contact-icon {
+            color: var(--terminal-green);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .contact-item a {
+            color: var(--terminal-cyan);
+            text-decoration: none;
+        }
+
+        .contact-item a:hover {
+            color: var(--terminal-green);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero .tagline {
+                font-size: 1.1rem;
+            }
+
+            section {
+                padding: 5rem 5% 3rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+            }
+
+            nav li {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: transparent;
+            color: var(--terminal-green);
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 2rem;
+            transition: all 0.3s;
+            font-weight: 600;
+            border: 2px solid var(--terminal-green);
+            animation: fadeInUp 1s 0.8s backwards;
+        }
+
+        .cta-button:hover {
+            background: var(--terminal-green);
+            color: var(--bg-primary);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.5);
+        }
+
+        .grade-badge {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            color: var(--terminal-green);
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            border: 1px solid var(--terminal-green);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        ul.bullet-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        ul.bullet-list li {
+            margin-bottom: 0.8rem;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        ul.bullet-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--terminal-green);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<canvas id="matrix-canvas"></canvas>
+
+<nav>
+    <div class="nav-header">
+        <span class="terminal-dot dot-red"></span>
+        <span class="terminal-dot dot-yellow"></span>
+        <span class="terminal-dot dot-green"></span>
+        <span class="nav-title">sakshi@portfolio:~</span>
+    </div>
+    <ul>
+        <li><a href="#home">home</a></li>
+        <li><a href="#about">education</a></li>
+        <li><a href="#experience">experience</a></li>
+        <li><a href="#projects">projects</a></li>
+        <li><a href="#skills">skills</a></li>
+        <li><a href="#achievements">achievements</a></li>
+        <li><a href="#certifications">certifications</a></li>
+        <li><a href="#positions">leadership</a></li>
+    </ul>
+</nav>
+
+<section id="home" class="hero">
+    <p class="prompt">guest@sakshi-portfolio:~$ ./introduce</p>
+    <h1>SAKSHI GUPTA<span class="cursor"></span></h1>
+    <p class="tagline">> Full Stack Developer</p>
+    <p class="tagline">> Associate Software Developer @ Goldman Sachs</p>
+    <div class="command-line">
+        <span class="prompt">$</span> cat about.txt<br>
+        Building scalable systems and ML-powered applications.<br>
+        Passionate about creating innovative solutions that drive impact.<br>
+    </div>
+    <!-- <a href="#contact" class="cta-button">[ CONNECT WITH ME ]</a> -->
+    <div class="social-links">
+        <a href="mailto:sakshigupta.0923@gmail.com">[EMAIL]</a>
+        <a href="https://github.com/Sakshi-7699" target="_blank">[GITHUB]</a>
+        <a href="https://www.linkedin.com/in/sakshi-gupta-0b264a193/" target="_blank">[LINKEDIN]</a>
+    </div>
+</section>
+
+<section id="about">
+    <h2>education.log</h2>
+    <div class="terminal-window">
+        <div class="terminal-header">
+            <span class="terminal-dot dot-red"></span>
+            <span class="terminal-dot dot-yellow"></span>
+            <span class="terminal-dot dot-green"></span>
+            <span class="terminal-title">masters_degree.sh</span>
+        </div>
+        <div class="terminal-content">
+            <h3 style="color: var(--terminal-cyan);">Master of Science - Advanced Computer Science</h3>
+            <p class="subtitle">University of Birmingham | Sep 2023 – Sep 2024 | United Kingdom</p>
+            <span class="grade-badge">STATUS: DISTINCTION ✓</span>
+            <span class="grade-badge" style="border-color: var(--terminal-yellow); color: var(--terminal-yellow);">🏆 BEST STUDENT AWARD</span>
+        </div>
+    </div>
+
+    <div class="terminal-window">
+        <div class="terminal-header">
+            <span class="terminal-dot dot-red"></span>
+            <span class="terminal-dot dot-yellow"></span>
+            <span class="terminal-dot dot-green"></span>
+            <span class="terminal-title">bachelors_degree.sh</span>
+        </div>
+        <div class="terminal-content">
+            <h3 style="color: var(--terminal-cyan);">Bachelor of Engineering - Computer Engineering</h3>
+            <p class="subtitle">Savitribai Phule Pune University | Aug 2017 – Jul 2021 | India</p>
+            <span class="grade-badge">STATUS: DISTINCTION ✓</span>
+        </div>
+    </div>
+</section>
+
+<section id="experience">
+    <h2>work_history --verbose</h2>
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-dot dot-red"></span>
+                    <span class="terminal-dot dot-yellow"></span>
+                    <span class="terminal-dot dot-green"></span>
+                    <span class="terminal-title">goldman_sachs.log</span>
+                </div>
+                <div class="terminal-content">
+                    <h3 style="color: var(--terminal-cyan);">Associate Software Developer</h3>
+                    <p class="subtitle">Goldman Sachs | Sep 2024 – Present | Birmingham, United Kingdom</p>
+                    <!-- <ul class="bullet-list">
+                        <li>Developed PyNexus, a unified API aggregation platform with RESTful APIs and caching improving query efficiency by 30%</li>
+                        <li>Built a multithreaded Python query engine for Snowflake and real-time datastores reducing data retrieval latency by 40%</li>
+                        <li>Designed the ZTS operations dashboard with real-time monitoring, enabling efficient and automated execution of DUS</li>
+                        <li>Led SFX-to-IBM MQ migration, implementing scalable queue-based messaging and serialisation pipelines, achieving 4X data throughput</li>
+                        <li>Refactored notification syncer to a horizontally scalable, event-driven architecture with parallel processing and fault tolerance, increasing throughput by 50%</li>
+                    </ul> -->
+                    <div class="tech-stack">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Java</span>
+                        <span class="tech-tag">Bash</span>
+                        <span class="tech-tag">Kafka</span>
+                        <span class="tech-tag">MQ</span>
+                        <span class="tech-tag">REST API</span>
+                        <span class="tech-tag">Kubernetes</span>
+                        <span class="tech-tag">SQL</span>
+                        <span class="tech-tag">Snowflake</span>
+                        <span class="tech-tag">Grafana</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <div class="timeline-item">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-dot dot-red"></span>
+                    <span class="terminal-dot dot-yellow"></span>
+                    <span class="terminal-dot dot-green"></span>
+                    <span class="terminal-title">credit_suisse.log</span>
+                </div>
+                <div class="terminal-content">
+                    <h3 style="color: var(--terminal-cyan);">SDE 2 - Full Stack Developer</h3>
+                    <p class="subtitle">Credit Suisse | Jul 2021 – Aug 2023 | Pune, India</p>
+                    <!-- <ul class="bullet-list">
+                        <li>Developed a reusable Directed Acyclic Graph (DAG) workflow engine to orchestrate dynamic JSON-based processes, reducing server overhead by 30%</li>
+                        <li>Contributed to developing an OTC trade booking automation system to extract trade details from unstructured emails, eliminating 90% of manual booking work</li>
+                        <li>Solely built a rule-based email classification engine and Smart Mail Manager using Angular, HTTP, and WebSockets for real-time processing visibility</li>
+                        <li>Developed MA Orchestrator as the central hub for all API calls, polling Kafka streaming and MongoDB batch data, with caching to enhance system reliability</li>
+                        <li>Built a tax extraction and reporting platform using Tesseract OCR, Camelot, and pdf-parser, with scheduler-based REST APIs to fully automate PDF data extraction</li>
+                    </ul> -->
+                    <div class="tech-stack">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Bash</span>
+                        <span class="tech-tag">Angular</span>
+                        <span class="tech-tag">MongoDB</span>
+                        <span class="tech-tag">Kafka</span>
+                        <span class="tech-tag">Docker</span>
+                        <span class="tech-tag">Jenkins</span>
+                        <span class="tech-tag">TensorFlow</span>
+                        <span class="tech-tag">REST APIs</span>
+                        <span class="tech-tag">Machine Learning</span>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-dot dot-red"></span>
+                    <span class="terminal-dot dot-yellow"></span>
+                    <span class="terminal-dot dot-green"></span>
+                    <span class="terminal-title">mymo_it.log</span>
+                </div>
+                <div class="terminal-content">
+                    <h3 style="color: var(--terminal-cyan);">Python Intern</h3>
+                    <p class="subtitle">Mymo IT Solutions | Jan 2020 – Mar 2020 | India</p>
+                    <!-- <ul class="bullet-list">
+                        <li>Reduced manual intervention by 50% by developing a web scraping-based scheduler to automatically generate dynamic tables of contents for projects on Read the Docs</li>
+                    </ul> -->
+                    <div class="tech-stack">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Scrapy</span>
+                        <span class="tech-tag">GitLab</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-dot dot-red"></span>
+                    <span class="terminal-dot dot-yellow"></span>
+                    <span class="terminal-dot dot-green"></span>
+                    <span class="terminal-title">persistent_systems.log</span>
+                </div>
+                <div class="terminal-content">
+                    <h3 style="color: var(--terminal-cyan);">Summer Trainee</h3>
+                    <p class="subtitle">Persistent Systems | Jul 2019 | India</p>
+                    <!-- <ul class="bullet-list">
+                        <li>Selected for a highly competitive training program focused on Functional Programming and Automata Theory</li>
+                    </ul> -->
+                    <div class="tech-stack">
+                        <span class="tech-tag">Gofer</span>
+                        <span class="tech-tag">Emacs</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+       
+    </div>
+</section>
+
+<section id="projects">
+    <h2>projects --list</h2>
+    <div class="cards">
+        <div class="card">
+            <div class="card-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+            </div>
+            <div class="card-content">
+                <h3>(Ai-R)ecruitment</h3>
+                <p>Recruitment platform with resume-JD matching, behavioral analysis, and cover letter summarization using advanced NLP to enhance candidate evaluation and reduce bias.</p>
+                <div class="tech-stack">
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">Angular</span>
+                    <span class="tech-tag">MongoDB</span>
+                    <span class="tech-tag">NLP</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+            </div>
+            <div class="card-content">
+                <h3>Artificial Vision for Visually Impaired</h3>
+                <p>Voice-enabled app leveraging VQA and OCR to interpret images and read text aloud, enhancing accessibility and user independence for visually impaired users.</p>
+                <div class="tech-stack">
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">Flask</span>
+                    <span class="tech-tag">PyTorch</span>
+                    <span class="tech-tag">Angular</span>
+                    <span class="tech-tag">OCR</span>
+                </div>
+            </div>
+        </div>
+
+         <div class="card">
+            <div class="card-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+            </div>
+            <div class="card-content">
+                <h3>Facial Recognition Based Attendance System</h3>
+                <p>eveloped a desktop-based attendance management platform, integrating facial recognition for automated student check-ins and providing faculty with real-time analytics</p>
+                <div class="tech-stack">
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">Flask</span>
+                    <span class="tech-tag">Tensorflow</span>
+                    <span class="tech-tag">Angular</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+            </div>
+            <div class="card-content">
+                <h3>RFID-based Smart Trolley</h3>
+                <p>Smart shopping cart system using RFID tags to automatically detect and price items, generating final receipts and reducing checkout time.</p>
+                <div class="tech-stack">
+                    <span class="tech-tag">Raspberry Pi</span>
+                    <span class="tech-tag">RFID</span>
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">C#</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="skills">
+    <h2>tech_stack.json</h2>
+    <div class="skills-grid">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+                <span class="terminal-title">languages.sh</span>
+            </div>
+            <div class="terminal-content">
+                <div class="skill-category">
+                    <h4>Programming</h4>
+                    <ul>
+                        <li>Python</li>
+                        <li>C++</li>
+                        <li>Bash</li>
+                        <li>HTML5 & CSS</li>
+                        <li>.NET</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+                <span class="terminal-title">frameworks.sh</span>
+            </div>
+            <div class="terminal-content">
+                <div class="skill-category">
+                    <h4>Frameworks</h4>
+                    <ul>
+                        <li>Angular</li>
+                        <li>Flask</li>
+                        <li>TensorFlow</li>
+                        <li>PyTorch</li>
+                        <li>Scrapy</li>
+                        <li>Kafka</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+                <span class="terminal-title">devops.sh</span>
+            </div>
+            <div class="terminal-content">
+                <div class="skill-category">
+                    <h4>DevOps</h4>
+                    <ul>
+                        <li>Git</li>
+                        <li>Docker</li>
+                        <li>Jenkins</li>
+                        <li>OpenShift</li>
+                        <li>Helm</li>
+                        <li>REST APIs</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+       <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+                <span class="terminal-title">databases.sh</span>
+            </div>
+            <div class="terminal-content">
+                <div class="skill-category">
+                    <h4>Databases</h4>
+                    <ul>
+                        <li>MongoDB</li>
+                        <li>MySQL</li>
+                        <li>Snowflake</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+                <span class="terminal-title">ml_ai.sh</span>
+            </div>
+            <div class="terminal-content">
+                <div class="skill-category">
+                    <h4>ML & AI</h4>
+                    <ul>
+                        <li>TensorFlow</li>
+                        <li>PyTorch</li>
+                        <li>NLP</li>
+                        <li>Computer Vision</li>
+                        <li>OCR</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+                <span class="terminal-title">tools.sh</span>
+            </div>
+            <div class="terminal-content">
+                <div class="skill-category">
+                    <h4>Tools & Other</h4>
+                    <ul>
+                        <li>Kubernetes</li>
+                        <li>Grafana</li>
+                        <li>Selenium</li>
+                        <li>IBM MQ</li>
+                        <li>WebSockets</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="achievements">
+    <h2>awards.log</h2>
+    <ul class="achievements-list">
+        <li>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <span style="color: var(--terminal-cyan); font-weight: 600;">🏆 Best Student in MSc Advanced Computer Science</span>
+                <span style="color: var(--text-secondary); font-size: 0.85rem;">Dec 2023</span>
+            </div>
+            <div style="margin-top: 0.5rem; color: var(--text-primary);">
+                University of Birmingham - Awarded for outstanding academic performance and exceptional contributions
+            </div>
+        </li>
+        <li>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <span style="color: var(--terminal-cyan); font-weight: 600;">💡 Innovator of the Year</span>
+                <span style="color: var(--text-secondary); font-size: 0.85rem;">Dec 2021</span>
+            </div>
+            <div style="margin-top: 0.5rem; color: var(--text-primary);">
+                Credit Suisse - Recognized for innovative solutions and impactful contributions to projects
+            </div>
+        </li>
+        <li>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <span style="color: var(--terminal-cyan); font-weight: 600;">⭐ RAVE Gold Bar for Accountability and Partnership</span>
+                <span style="color: var(--text-secondary); font-size: 0.85rem;">Dec 2020</span>
+            </div>
+            <div style="margin-top: 0.5rem; color: var(--text-primary);">
+                Credit Suisse - Honored for demonstrating exceptional accountability and collaborative excellence
+            </div>
+        </li>
+    </ul>
+</section>
+
+<section id="certifications">
+    <h2>certifications --show-all</h2>
+    <div class="cards">
+        <div class="card">
+            <div class="card-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+            </div>
+            <div class="card-content">
+                <h3>Computer Vision Practitioner</h3>
+                <p class="subtitle">NVIDIA</p>
+                <p>Comprehensive certification in computer vision techniques and practical applications using deep learning frameworks.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+            </div>
+            <div class="card-content">
+                <h3>Convolutional Neural Networks</h3>
+                <p class="subtitle">deeplearning.ai</p>
+                <p>Advanced deep learning specialization covering CNN architectures, image recognition, and neural network optimization.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+            </div>
+            <div class="card-content">
+                <h3>Natural Language Processing</h3>
+                <p class="subtitle">deeplearning.ai</p>
+                <p>Comprehensive NLP course covering sentiment analysis, machine translation, and transformers architecture.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+            </div>
+            <div class="card-content">
+                <h3>Angular Certified Full Stack Developer</h3>
+                <p class="subtitle">Udemy</p>
+                <p>Complete Angular development certification covering front-end architecture, components, services, and full-stack integration.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+            </div>
+            <div class="card-content">
+                <h3>AI Explore ML: Beginner and Intermediate</h3>
+                <p class="subtitle">Google</p>
+                <p>Foundational and intermediate machine learning concepts, algorithms, and practical implementation techniques.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+            </div>
+            <div class="card-content">
+                <h3>Querying Microsoft SQL Server</h3>
+                <p class="subtitle">Udemy</p>
+                <p>Advanced SQL querying techniques, database optimization, and complex query design for enterprise applications.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="positions">
+    <h2>leadership --roles</h2>
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-dot dot-red"></span>
+                    <span class="terminal-dot dot-yellow"></span>
+                    <span class="terminal-dot dot-green"></span>
+                    <span class="terminal-title">teaching_assistant_algorithms.log</span>
+                </div>
+                <div class="terminal-content">
+                    <h3 style="color: var(--terminal-cyan);">Teaching Assistant - Algorithms and Programming</h3>
+                    <p class="subtitle">University of Birmingham | Oct 2023 – Sep 2024 | United Kingdom</p>
+                    <ul class="bullet-list">
+                        <li>Conducted data structures and algorithms classes in Python to 150+ students across Dubai and Birmingham campuses</li>
+                        <li>Provided mentorship and guidance on complex programming concepts and algorithm optimization techniques</li>
+                        <li>Facilitated interactive learning sessions enhancing student engagement and understanding</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-dot dot-red"></span>
+                    <span class="terminal-dot dot-yellow"></span>
+                    <span class="terminal-dot dot-green"></span>
+                    <span class="terminal-title">hackathon_coordinator.log</span>
+                </div>
+                <div class="terminal-content">
+                    <h3 style="color: var(--terminal-cyan);">Teaching Assistant - Birmingham Project</h3>
+                    <p class="subtitle">University of Birmingham | Jun 2023 | United Kingdom</p>
+                    <ul class="bullet-list">
+                        <li>Coordinated the Birmingham Project Hackathon in collaboration with Bloomberg</li>
+                        <li>Mentored a team that secured first place by providing technical guidance and strategic direction</li>
+                        <li>Facilitated cross-functional collaboration between students and industry professionals</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<footer style="background: var(--bg-secondary); padding: 2rem 5%; text-align: center; border-top: 2px solid var(--terminal-green); font-family: 'JetBrains Mono', monospace;">
+    <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">$ echo "Thanks for visiting!"</p>
+    <p style="color: var(--terminal-green);">> Sakshi Gupta © 2024 </p>
+    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 1rem;">
+        <span style="color: var(--terminal-cyan);">~/portfolio</span> (main) $ _
+    </p>
+</footer>
+
+<script>
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('nav a').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Update active state
+            document.querySelectorAll('nav a').forEach(link => link.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Matrix rain effect background
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*(){}[]<>+=';
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+
+    function drawMatrix() {
+        ctx.fillStyle = 'rgba(13, 17, 23, 0.08)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#00ff41';
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+            const text = chars[Math.floor(Math.random() * chars.length)];
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    }
+
+    setInterval(drawMatrix, 35);
+
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.card, .timeline-item, .terminal-window').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+
+    // Update active nav on scroll
+    window.addEventListener('scroll', () => {
+        let current = '';
+        document.querySelectorAll('section').forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            if (window.pageYOffset >= sectionTop - 200) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        document.querySelectorAll('nav a').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${current}`) {
+                link.classList.add('active');
+            }
+        });
+    });
+</script>
+</body>
+</html
